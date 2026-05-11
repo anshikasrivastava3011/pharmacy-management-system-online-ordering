@@ -77,7 +77,7 @@
                 $('#status').text(response.order.status)
                 $('#isInsured').text(response.order.is_insured ? "Yes" : "No")
                 $('#creatorType').text(response.order.creator_type)
-                $('#totalPrice').text(response.order.price ?? "0")
+                $('#totalPrice').text('₹ ' + (response.order.price ?? "0"))
                 let medicines = response.order.medicines
                 let medicineQunaity = response.order.medicines.map(medicine => medicine.pivot.quantity)
                 let tableRows = '';

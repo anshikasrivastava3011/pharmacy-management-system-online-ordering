@@ -44,7 +44,7 @@ class StoreAddressRequest extends FormRequest
                 'required' => 'The Street Name is Required',
                 'string' => 'The Street Name must be String'
             ],
-            'building_no' => [
+            'building_number' => [
                 'required' => 'The Building Number is Required',
                 'numeric' => 'The Building Number must be Number'
             ],

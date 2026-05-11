@@ -38,6 +38,13 @@
             </div>
         </li>
 
+        <!-- Dark / Light toggle -->
+        <li class="nav-item">
+            <button id="theme-toggle" class="nav-link btn btn-link border-0 shadow-none" title="Toggle dark/light mode" style="cursor:pointer;">
+                <i id="theme-icon" class="fas fa-sun"></i>
+            </button>
+        </li>
+
         <!-- Fullscreen -->
         <li class="nav-item">
             <a class="nav-link" data-widget="fullscreen" href="#" role="button">

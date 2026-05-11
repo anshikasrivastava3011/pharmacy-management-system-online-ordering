@@ -25,7 +25,7 @@ class StorePaymentRequest extends FormRequest
     {
         return [
             'id'=> ['required','unique:payments,id'],
-            'method' => ['required,in:cash,card'],
+            'method' => ['required', 'in:cash,card'],
             'order_id' => ['required|exists:orders,id'],
         ];
     }

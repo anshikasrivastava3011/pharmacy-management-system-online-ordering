@@ -29,7 +29,7 @@ class UpdatePharmacyRequest extends FormRequest
             'pharmacy_name' => ['required', 'min:3'],
             'name' => ['required', 'min:3'],
             'email' => [Rule::unique('users', 'email')->ignore($this->user_id),'required'],
-            'password' => ['required', 'min:6'],
+            'password' => ['nullable', 'min:6'],
             'avatar_image' => ['mimes:jpg,jpeg'],
             'area_id' => ['required','exists:areas,id'],
             'priority' => ['required','integer']

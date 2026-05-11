@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use PhpParser\Node\Attribute;
 
 class Order extends Model
 {
@@ -54,14 +53,13 @@ class Order extends Model
             $price = Medicine::where('id', $orderMedicine[$i])->first()->price;
             $totalPrice += $price * $quantity[$i];
         }
-        return $totalPrice/100; //convert from cent to dollars
+        return $totalPrice;
     }
 
     public static function createOrderMedicine($order, $quantity, $orderMedicine)
     {
         for ($i = 0; $i < count($orderMedicine); $i++) {
-            $id = Medicine::where('id', $orderMedicine[$i])->first()->id;
-            $order->medicines($id)->attach($orderMedicine[$i], ['quantity' => $quantity[$i]]);
+            $order->medicines()->attach($orderMedicine[$i], ['quantity' => $quantity[$i]]);
         }
     }
     public function client()
@@ -72,16 +70,16 @@ class Order extends Model
     {
         return $this->belongsTo(Address::class, 'delivering_address_id');
     }
-    public function orderPrescription()
+    public function prescriptions()
     {
-        return $this->hasMany(OrderPrescription::class);
+        return $this->hasMany(Prescription::class);
     }
 
     public static function updateOrderMedicine($order, $editedQuantity, $editedOrderMedicine)
     {
+        $order->medicines()->detach();
         for ($i = 0; $i < count($editedOrderMedicine ?? []); $i++) {
-            $id = Medicine::where('id', $editedOrderMedicine[$i])->first()->id;
-            $order->medicines($id)->attach($editedOrderMedicine[$i], ['quantity' => $editedQuantity[$i]]);
+            $order->medicines()->attach($editedOrderMedicine[$i], ['quantity' => $editedQuantity[$i]]);
         }
     }
 }

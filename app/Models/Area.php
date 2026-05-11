@@ -32,6 +32,6 @@ class Area extends Model
 
     public function clients()
     {
-        return $this->hasMany(Client::class);
+        return $this->hasMany(Address::class)->with('client');
     }
 }

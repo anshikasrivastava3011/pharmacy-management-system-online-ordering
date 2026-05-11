@@ -23,12 +23,13 @@ class User extends Authenticatable implements MustVerifyEmail, BannableInterface
      * @var array<int, string>
      */
     protected $fillable = [
-        'id',
         'name',
         'email',
         'password',
         'email_verified_at',
-        'remember_token'
+        'remember_token',
+        'last_login',
+        'banned_at',
     ];
 
     /**
@@ -43,11 +44,6 @@ class User extends Authenticatable implements MustVerifyEmail, BannableInterface
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-    public function owns()
-    {
-        return $this->hasOne(Pharmacy::class, 'user_id');
-    }
-
     public function client()
     {
         return $this->hasOne(Client::class);
@@ -66,15 +62,6 @@ class User extends Authenticatable implements MustVerifyEmail, BannableInterface
     public function doctor()
     {
         return $this->hasOne(Doctor::class);
-    }
-    public function isAdmin()
-    {
-        return $this->role === 'admin';
-    }
-
-    public function isPharmacy()
-    {
-        return $this->role === 'pharmacy';
     }
 
    public function getEmailForVerification()

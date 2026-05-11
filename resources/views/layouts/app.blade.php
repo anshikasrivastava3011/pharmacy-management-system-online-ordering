@@ -18,7 +18,12 @@
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
 </head>
 
-<body class="hold-transition dark-mode sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
+<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
+<script>
+    if (localStorage.getItem('pharmacy-theme') !== 'light') {
+        document.body.classList.add('dark-mode');
+    }
+</script>
 <div class="wrapper">
 
     <div class="preloader flex-column justify-content-center align-items-center">
@@ -70,6 +75,39 @@
 
 @yield('scripts')
 @stack('scripts')
+
+<script>
+(function () {
+    var sidebar = document.querySelector('.main-sidebar');
+
+    function applyTheme(theme) {
+        if (theme === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.getElementById('theme-icon').className = 'fas fa-sun';
+            if (sidebar) {
+                sidebar.classList.remove('sidebar-light-primary');
+                sidebar.classList.add('sidebar-dark-primary');
+            }
+            localStorage.setItem('pharmacy-theme', 'dark');
+        } else {
+            document.body.classList.remove('dark-mode');
+            document.getElementById('theme-icon').className = 'fas fa-moon';
+            if (sidebar) {
+                sidebar.classList.remove('sidebar-dark-primary');
+                sidebar.classList.add('sidebar-light-primary');
+            }
+            localStorage.setItem('pharmacy-theme', 'light');
+        }
+    }
+
+    // Sync icon and sidebar with the class already on body (set before render)
+    applyTheme(document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+
+    document.getElementById('theme-toggle').addEventListener('click', function () {
+        applyTheme(document.body.classList.contains('dark-mode') ? 'light' : 'dark');
+    });
+})();
+</script>
 
 </body>
 </html>

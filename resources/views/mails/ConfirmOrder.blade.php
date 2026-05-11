@@ -57,11 +57,11 @@
                 <li><strong>Ordered medicine : </strong>{{$order_medicine->name}}</li>
             @endforeach
             <li><strong>Order Status : </strong>{{$order->status}}</li>
-            <li><strong>Total Price : </strong>{{$order->price}}</li>
+            <li><strong>Total Price : </strong>₹ {{$order->price}}</li>
         </ul>
         <div class="btn-container">
-            <a href="{{route('stripe.get',$order->id)}}" type="submit" class="btn btn-success" disabled>Confirm Order</a>
-            <a href="{{route("orders.updatestatus",$order->id)}}" type="submit" class="btn btn-danger" disabled>Cancel Order</a>
+            <a href="{{route('orders.confirm',$order->id)}}" class="btn btn-success">Confirm Order</a>
+            <a href="{{route('orders.updatestatus',$order->id)}}" class="btn btn-danger">Cancel Order</a>
         </div>
 
     </div>

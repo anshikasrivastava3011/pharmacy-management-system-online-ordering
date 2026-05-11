@@ -67,7 +67,6 @@ class AddressController extends Controller
 
     public function destroy($id)
     {
-        //dd($id);
         if (is_numeric($id)) {
             try {
                 Address::where('id', $id)->delete();

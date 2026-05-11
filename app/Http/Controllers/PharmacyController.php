@@ -48,7 +48,7 @@ class PharmacyController extends Controller
             'area_id' => $request->area_id,
             'priority' => $request->priority,
             'avatar_image' => $avatar_name
-        ])->save();
+        ]);
         $user->assignRole('pharmacy');
         return redirect()->route('pharmacies.index')->with('success', 'Pharmacy has been Created Successfully!')->with('timeout', 5000);
     }
@@ -66,14 +66,8 @@ class PharmacyController extends Controller
                     $assignedDoctors = Doctor::where('pharmacy_id', $id)->get();
 
                     foreach($assignedOrders as $assignedOrder){
-
-                        if($assignedOrder){
-                            $orderMedicines = OrderMedicine::where('order_id',$assignedOrder->id);
-                            foreach($orderMedicines as $orderMedicine){
-                                $orderMedicine->delete();
-                            }
-                            $assignedOrder->delete();
-                        }
+                        OrderMedicine::where('order_id', $assignedOrder->id)->delete();
+                        $assignedOrder->delete();
                     }
 
                     foreach($assignedDoctors as $assignedDoctor){

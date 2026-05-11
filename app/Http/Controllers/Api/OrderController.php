@@ -32,7 +32,7 @@ class OrderController extends Controller
         $delivering_address_id = $request->input('delivering_address_id');
         $is_insured = $request->input('is_insured');
         $prescriptions = $request->input('prescriptions');
-        $addresses = Address::where('client_id', $client->Client->id)->get();
+        $addresses = Address::where('client_id', $client->client->id)->get();
         if ($addresses->find($delivering_address_id)) {
             if ($request->hasFile('prescriptions')) {
                 $order = new Order([

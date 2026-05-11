@@ -24,7 +24,7 @@ class DoctorController extends Controller
             $doctors = Doctor::all();
         }elseif(auth()->user()->hasRole('pharmacy')){
             $pharmacies = Pharmacy::where('user_id', auth()->user()->id)->get();
-            $doctors = Doctor::all();
+            $doctors = Doctor::where('pharmacy_id', auth()->user()->pharmacy->id)->get();
         }else{
             $doctors = Doctor::where('user_id', auth()->user()->id)->firstOrFail();
             $pharmacies = Pharmacy::where('id', $doctors->pharmacy_id)->get();

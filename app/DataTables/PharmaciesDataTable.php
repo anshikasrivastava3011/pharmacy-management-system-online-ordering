@@ -3,11 +3,8 @@
 namespace App\DataTables;
 
 use App\Models\Pharmacy;
-use Attribute;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Illuminate\Support\Facades\Auth;
-use League\CommonMark\Extension\Attributes\Node\Attributes;
-use PhpParser\Node\Stmt\Return_;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
 use Yajra\DataTables\Html\Button;
@@ -99,7 +96,7 @@ class PharmaciesDataTable extends DataTable
 
                 })
             ->rawColumns(['avatar', 'actions'])
-            ->setRowId('pharmacy_id');
+            ->setRowId('id');
         }
 
     /**

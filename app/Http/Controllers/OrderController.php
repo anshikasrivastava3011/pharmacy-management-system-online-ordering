@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\OrderConfirmation;
 use App\Models\Address;
 use App\Models\Area;
 use App\Models\Client;
 use App\Models\Doctor;
 use App\Models\Medicine;
-use App\Models\OrderMedicine;
 use App\Models\Pharmacy;
 use App\Models\Prescription;
 use App\Models\User;
@@ -89,24 +87,20 @@ class OrderController extends Controller
         $user = User::find($order->user_id);
         $pharmacy = Pharmacy::find($order->pharmacy_id);
         $doctor = Doctor::find($order->doctor_id);
-        $doctor_name = User::find($doctor->user_id ?? 1);
+        $doctor_name = $doctor ? User::find($doctor->user_id) : null;
         $address = Address::find($order->delivering_address_id);
-        $area = Area::find($address->area_id);
+        $area = $address ? Area::find($address->area_id) : null;
         $prescriptions = Prescription::where('order_id', $order->id)->get();
 
-
         return response()->json([
-            'order' => $order,
-            'user' => $user,
-            'pharmacy' => $pharmacy,
-            'doctor' => $doctor,
+            'order'       => $order,
+            'user'        => $user,
+            'pharmacy'    => $pharmacy,
+            'doctor'      => $doctor,
             'doctor_name' => $doctor_name,
-            'address' => $address,
-            'area' => $area,
-            'doctor_name' => $doctor_name,
-            'address' => $address,
-            'area' => $area,
-            'prescriptions' => $prescriptions
+            'address'     => $address,
+            'area'        => $area,
+            'prescriptions' => $prescriptions,
         ]);
     }
 
@@ -190,6 +184,22 @@ class OrderController extends Controller
         Prescription::where("order_id", $id)->delete();
         $order->delete();
         return to_route('orders.index')->with('success', 'order deleted successfully!')->with('timeout', 5000);
+    }
+
+    public function confirm($order_id)
+    {
+        if (!is_numeric($order_id)) {
+            abort(404);
+        }
+
+        $order = Order::where('id', $order_id)->firstOrFail();
+
+        if ($order->status === 'WaitingForUserConfirmation') {
+            $order->update(['status' => 'Confirmed']);
+            return view('actions.confirm', ['order' => $order, 'state' => 'Confirmednow']);
+        }
+
+        return view('actions.confirm', ['order' => $order, 'state' => $order->status]);
     }
 
     public function updatestatus($order_id)
