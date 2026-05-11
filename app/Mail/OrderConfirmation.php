@@ -45,7 +45,7 @@ class OrderConfirmation extends Mailable
     public function content()
     {
         return new Content(
-            markdown: 'mails.ConfirmOrder',
+            view: 'mails.ConfirmOrder',
             with: [
                 'order' => $this->order,
                 'notifiable' => $this->notifiable
