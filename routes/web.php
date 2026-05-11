@@ -39,6 +39,9 @@ Auth::routes([
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
+Route::get('/orders/status/{id}', [OrderController::class, 'updatestatus'])->name('orders.updatestatus');
+Route::get('/orders/confirm/{id}', [OrderController::class, 'confirm'])->name('orders.confirm');
+
 Route::group(['middleware' => ['auth']], function () {
     Route::middleware(['role:admin|pharmacy|doctor', 'logs-out-banned-user'])->group(function () {
         Route::get('/', function () {
@@ -58,9 +61,6 @@ Route::group(['middleware' => ['auth']], function () {
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::delete('/orders/{id}', [OrderController::class, 'destroy'])->name('orders.destroy');
         Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
-
-        Route::get('/orders/status/{id}', [OrderController::class, 'updatestatus'])->name('orders.updatestatus');
-        Route::get('/orders/confirm/{id}', [OrderController::class, 'confirm'])->name('orders.confirm');
 
         Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
         Route::get('/orders/{id}/edit', [OrderController::class, 'edit'])->name('orders.edit');

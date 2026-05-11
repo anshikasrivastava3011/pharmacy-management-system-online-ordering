@@ -112,7 +112,7 @@
         <option value="WaitingForUserConfirmation">Waiting For User Confirmation</option>
         <option value="Confirmed">Confirmed</option>
         <option value="Delivered">Delivered</option>
-        <option value="Cancelled">Cancelled</option>
+        <option value="Canceled">Cancelled</option>
     </select>
 </div>
                             <div class="col-md-6 mb-3 ml-3 ">

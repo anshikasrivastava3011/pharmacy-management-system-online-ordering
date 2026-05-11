@@ -25,7 +25,7 @@ class ChartController extends Controller
         }
 
         $data = [];
-        $labels = ['New', 'Processing', 'WaitingForUserConfirmation', 'Canceled', 'Delivered'];
+        $labels = ['Processing', 'WaitingForUserConfirmation', 'Confirmed', 'Canceled', 'Delivered'];
         foreach($labels as $label) {
             if(array_key_exists($label, $orders->toArray())) {
                 array_push($data, $orders[$label]->count());
