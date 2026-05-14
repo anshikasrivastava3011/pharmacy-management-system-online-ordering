@@ -3,68 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-    <title>Document</title>
-    <style>
-        .container{
-            padding: 50px;
-        }
-        form{
-            display: inline-block;
-            margin-right: 10px
-        }
-        a{
-            text-decoration: none;
-        }
-        .btn-success,.btn-danger{
-            border-style: none;
-            border-radius: 7px;
-            padding: 10px 30px;
-            color: white;
-            margin-bottom: 10px;
+    <title>Order Confirmation</title>
 
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            padding: 30px;
         }
-        .btn-success:hover{
-            background-color: #00bc8d91;
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 700px;
+            margin: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
-        .btn-success{
-            background-color: #00bc8c;
+
+        h1 {
+            color: #28a745;
         }
-        .btn-danger{
-            background-color: #e74c3c;
+
+        ul {
+            padding-left: 20px;
         }
-        .btn-danger:hover{
-            background-color: #e74d3c92;
+
+        li {
+            margin-bottom: 10px;
         }
-        .btn-container{
-            text-align: center;
-            width: 50%;
-            margin: 50px auto;
+
+        .status {
+            display: inline-block;
+            background: #fff3cd;
+            color: #856404;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .footer {
+            margin-top: 30px;
+            color: #666;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Hello {{$notifiable->name}}!</h1>
-        <p>Your order is ready and waiting for your confirmation!!</p>
-        <h4>Order Details : </h4>
-        <ul>
-            <li><strong>Order ID : </strong>{{$order->id}}</li>
-            <li><strong>Delivery Address : </strong>{{$order->address->area->name}}</li>
-            <li><strong>Pharmacy name : </strong>{{$order->pharmacy->pharmacy_name}}</li>
-            @foreach ($order->medicines as $order_medicine)
-                <li><strong>Ordered medicine : </strong>{{$order_medicine->name}}</li>
-            @endforeach
-            <li><strong>Order Status : </strong>{{$order->status}}</li>
-            <li><strong>Total Price : </strong>₹ {{$order->price}}</li>
-        </ul>
-        <div class="btn-container">
-            <a href="{{route('orders.confirm',$order->id)}}" class="btn btn-success">Confirm Order</a>
-            <a href="{{route('orders.updatestatus',$order->id)}}" class="btn btn-danger">Cancel Order</a>
-        </div>
 
+<div class="container">
+    <h1>Hello {{ $notifiable->name }}!</h1>
+
+    <p>Your medicine order has been placed successfully.</p>
+
+    <p>Your order is currently:</p>
+
+    <p>
+        <span class="status">{{ $order->status }}</span>
+    </p>
+
+    <h3>Order Details</h3>
+
+    <ul>
+        <li><strong>Order ID:</strong> {{ $order->id }}</li>
+        <li><strong>Pharmacy:</strong> {{ $order->pharmacy->pharmacy_name }}</li>
+        <li><strong>Delivery Area:</strong> {{ $order->address->area->name }}</li>
+        <li><strong>Total Price:</strong> ₹{{ $order->price }}</li>
+    </ul>
+
+    <h3>Medicines Ordered</h3>
+
+    <ul>
+        @foreach ($order->medicines as $medicine)
+            <li>
+                {{ $medicine->name ?? $medicine->commercial_name ?? $medicine->scientific_name }}
+                — Quantity: {{ $medicine->pivot->quantity }}
+            </li>
+        @endforeach
+    </ul>
+
+    <div class="footer">
+        <p>
+            Thank you for choosing our pharmacy.
+            Our team will process your order shortly.
+        </p>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+</div>
+
 </body>
 </html>

@@ -1,10 +1,11 @@
 <?php
 
 namespace App\Http\Controllers\Auth;
-use App\Models\Address;
+
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\Address;
 use App\Models\Client;
+use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -33,40 +34,42 @@ class RegisterController extends Controller
     }
 
     protected function create(array $data)
-{
-    $user = User::create([
-        'name' => $data['name'],
-        'email' => $data['email'],
-        'password' => Hash::make($data['password']),
-    ]);
+    {
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+        ]);
 
-    $user->assignRole('client');
+        $user->assignRole('client');
 
-    $client = Client::create([
-        'id' => time(),
-        'gender' => $data['gender'],
-        'date_of_birth' => $data['date_of_birth'],
-        'avatar_image' => 'default-avatar.jpg',
-        'phone' => $data['phone'],
-        'area_id' => 144401,
-        'street_name' => 'Not Added',
-        'building_no' => 0,
-        'floor_number' => 0,
-        'flat_number' => 0,
-        'is_main' => 1,
-        'user_id' => $user->id,
-    ]);
+        $clientId = time();
 
-    Address::create([
-        'client_id' => $client->id,
-        'area_id' => 144401,
-        'street_name' => 'Not Added',
-        'building_number' => 0,
-        'floor_number' => 0,
-        'flat_number' => 0,
-        'is_main' => 1,
-    ]);
+        $client = Client::create([
+            'id' => $clientId,
+            'gender' => $data['gender'],
+            'date_of_birth' => $data['date_of_birth'],
+            'avatar_image' => 'default-avatar.jpg',
+            'phone' => $data['phone'],
+            'area_id' => 144401,
+            'street_name' => 'Not Added',
+            'building_no' => 0,
+            'floor_number' => 0,
+            'flat_number' => 0,
+            'is_main' => 1,
+            'user_id' => $user->id,
+        ]);
 
-    return $user;
-}
+        Address::create([
+            'client_id' => $clientId,
+            'area_id' => 144401,
+            'street_name' => 'Not Added',
+            'building_number' => 0,
+            'floor_number' => 0,
+            'flat_number' => 0,
+            'is_main' => 1,
+        ]);
+
+        return $user;
+    }
 }

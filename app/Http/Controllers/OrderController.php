@@ -17,6 +17,8 @@ use App\Jobs\OrderConfirmationJob;
 use App\Models\Order;
 use App\Models\OrderMedicine;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderConfirmation;
 
 class OrderController extends Controller
 {
@@ -421,9 +423,12 @@ public function placeCartOrder()
         $medicine->quantity = $medicine->quantity - $item['quantity'];
         $medicine->save();
     }
+    $order->load('medicines', 'address.area', 'pharmacy');
+
+    Mail::to($user->email)->send(new OrderConfirmation($order, $user));
 
     session()->forget('cart');
 
-    return redirect()->route('client.orders')->with('success', 'Order placed successfully!');
+    return redirect()->route('client.orders')->with('success', 'Order placed successfully! Confirmation email sent.');
 }
 }
