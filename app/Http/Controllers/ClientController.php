@@ -11,6 +11,7 @@ use App\Models\Client;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class ClientController extends Controller
 {
@@ -128,4 +129,55 @@ public function update(UpdateClientRequest $request, $national_id)
             return to_route('clients.index')->with('success', 'Client Record Deleted Successfully.')->with('timeout', 3000);
         }
     }
+    public function clientProfile()
+{
+    $user = Auth::user();
+
+    $client = Client::where('user_id', $user->id)->firstOrFail();
+    $address = Address::where('client_id', $client->id)->where('is_main', 1)->first();
+    $areas = Area::all();
+
+    return view('client.profile', compact('user', 'client', 'address', 'areas'));
+}
+
+public function updateClientProfile(Request $request)
+{
+    $request->validate([
+        'phone' => 'required|string|max:20',
+        'area_id' => 'required|exists:areas,id',
+        'street_name' => 'required|string|max:255',
+        'building_number' => 'required|integer|min:0',
+        'floor_number' => 'required|integer|min:0',
+        'flat_number' => 'required|integer|min:0',
+    ]);
+
+    $user = Auth::user();
+    $client = Client::where('user_id', $user->id)->firstOrFail();
+
+    $client->update([
+        'phone' => $request->phone,
+        'area_id' => $request->area_id,
+        'street_name' => $request->street_name,
+        'building_no' => $request->building_number,
+        'floor_number' => $request->floor_number,
+        'flat_number' => $request->flat_number,
+        'is_main' => 1,
+    ]);
+
+    Address::updateOrCreate(
+        [
+            'client_id' => $client->id,
+            'is_main' => 1,
+        ],
+        [
+            'area_id' => $request->area_id,
+            'street_name' => $request->street_name,
+            'building_number' => $request->building_number,
+            'floor_number' => $request->floor_number,
+            'flat_number' => $request->flat_number,
+        ]
+    );
+
+    return redirect()->route('client.profile')->with('success', 'Profile and address updated successfully!');
+}
 }

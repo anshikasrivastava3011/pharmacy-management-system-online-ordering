@@ -1,20 +1,29 @@
 <nav class="main-header navbar navbar-expand navbar-dark">
-    <!-- Left navbar links -->
+    @php
+        $isClient = auth()->check() && auth()->user()->hasRole('client');
+    @endphp
+
+    <!-- Left navbar -->
     <ul class="navbar-nav">
+        @if(!$isClient)
         <li class="nav-item">
             <a class="nav-link" data-widget="pushmenu" href="#" role="button">
                 <i class="fas fa-bars"></i>
             </a>
         </li>
+        @endif
 
         <li class="nav-item d-none d-sm-inline-block">
-            <a href="{{ route('index') }}" class="nav-link">Home</a>
+            <a href="{{ $isClient ? route('client.dashboard') : route('index') }}" class="nav-link">
+                Home
+            </a>
         </li>
     </ul>
 
-    <!-- Right navbar links -->
+    <!-- Right navbar -->
     <ul class="navbar-nav ml-auto">
 
+        @if(!$isClient)
         <!-- Search -->
         <li class="nav-item">
             <a class="nav-link" data-widget="navbar-search" href="#" role="button">
@@ -37,71 +46,82 @@
                 </form>
             </div>
         </li>
+        @endif
 
-        <!-- Dark / Light toggle -->
+        <!-- Theme toggle -->
         <li class="nav-item">
-            <button id="theme-toggle" class="nav-link btn btn-link border-0 shadow-none" title="Toggle dark/light mode" style="cursor:pointer;">
+            <button id="theme-toggle" class="nav-link btn btn-link border-0 shadow-none">
                 <i id="theme-icon" class="fas fa-sun"></i>
             </button>
         </li>
 
         <!-- Fullscreen -->
         <li class="nav-item">
-            <a class="nav-link" data-widget="fullscreen" href="#" role="button">
+            <a class="nav-link" data-widget="fullscreen" href="#">
                 <i class="fas fa-expand-arrows-alt"></i>
             </a>
         </li>
 
-        <!-- Grid Dropdown -->
+        <!-- Grid menu -->
         <li class="nav-item dropdown">
-            <a class="nav-link" data-toggle="dropdown" href="#" role="button">
+            <a class="nav-link" data-toggle="dropdown" href="#">
                 <i class="fas fa-th-large"></i>
             </a>
 
             <div class="dropdown-menu dropdown-menu-right">
-                <a href="{{ route('index') }}" class="dropdown-item">
-                    <i class="fas fa-home mr-2"></i> Dashboard
-                </a>
+                @if($isClient)
+                    <a href="{{ route('client.dashboard') }}" class="dropdown-item">
+                        <i class="fas fa-home mr-2"></i> Dashboard
+                    </a>
 
-                <a href="{{ url('/medicines') }}" class="dropdown-item">
-                    <i class="fas fa-pills mr-2"></i> Medicines
-                </a>
+                    <a href="{{ route('client.medicines') }}" class="dropdown-item">
+                        <i class="fas fa-pills mr-2"></i> Medicines
+                    </a>
 
-                <a href="{{ url('/orders') }}" class="dropdown-item">
-                    <i class="fas fa-shopping-cart mr-2"></i> Orders
-                </a>
+                    <a href="{{ url('/client/orders') }}" class="dropdown-item">
+                        <i class="fas fa-shopping-cart mr-2"></i> Orders
+                    </a>
+                @else
+                    <a href="{{ route('index') }}" class="dropdown-item">
+                        <i class="fas fa-home mr-2"></i> Dashboard
+                    </a>
+
+                    <a href="{{ url('/medicines') }}" class="dropdown-item">
+                        <i class="fas fa-pills mr-2"></i> Medicines
+                    </a>
+
+                    <a href="{{ url('/orders') }}" class="dropdown-item">
+                        <i class="fas fa-shopping-cart mr-2"></i> Orders
+                    </a>
+                @endif
             </div>
         </li>
 
         @guest
-        @if (Route::has('login'))
-        <li class="nav-item">
-            <a class="nav-link active" href="{{ route('login') }}">Login</a>
-        </li>
-        @endif
+            <li class="nav-item">
+                <a class="nav-link active" href="{{ route('login') }}">Login</a>
+            </li>
         @else
-        <!-- Admin/User Dropdown -->
+        <!-- User dropdown -->
         <li class="nav-item dropdown">
-            <a class="nav-link d-flex align-items-center" data-toggle="dropdown" href="#" role="button">
+            <a class="nav-link d-flex align-items-center" data-toggle="dropdown" href="#">
+
                 @role('pharmacy')
                 <img src="{{ asset('storage/pharmacies_Images/' . Auth::user()->pharmacy->avatar_image) }}"
-                    class="img-circle elevation-2 mr-2"
-                    alt="User Image"
-                    width="30">
+                     class="img-circle elevation-2 mr-2"
+                     width="30">
                 @endrole
 
                 @role('doctor')
                 <img src="{{ asset('storage/doctors_Images/' . Auth::user()->doctor->avatar_image) }}"
-                    class="img-circle elevation-2 mr-2"
-                    alt="User Image"
-                    width="30">
+                     class="img-circle elevation-2 mr-2"
+                     width="30">
                 @endrole
 
                 @role('admin')
                 <img src="{{ asset('dist/img/admin.jpg') }}"
-                    class="img-circle elevation-2 mr-2"
-                    alt="Admin Image"
-                    width="30">
+                     class="img-circle elevation-2 mr-2"
+                     width="30">
                 @endrole
 
                 <span>{{ Auth::user()->name }}</span>
@@ -114,7 +134,7 @@
 
                 <div class="dropdown-divider"></div>
 
-                <a href="{{ route('index') }}" class="dropdown-item">
+                <a href="{{ $isClient ? route('client.dashboard') : route('index') }}" class="dropdown-item">
                     <i class="fas fa-user mr-2"></i> Dashboard
                 </a>
 

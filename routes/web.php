@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Auth;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
 Route::get('/logout', function () {
     Auth::logout();
     request()->session()->invalidate();
@@ -33,9 +34,7 @@ Route::get('/logout', function () {
 });
 
 //Auth Routes
-Auth::routes([
-    'verify' => true
-]);
+Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
@@ -43,6 +42,45 @@ Route::get('/orders/status/{id}', [OrderController::class, 'updatestatus'])->nam
 Route::get('/orders/confirm/{id}', [OrderController::class, 'confirm'])->name('orders.confirm');
 
 Route::group(['middleware' => ['auth']], function () {
+    Route::middleware(['role:client'])->group(function () {
+        Route::get('/client/dashboard', function () {
+            return view('client.dashboard');
+        })->name('client.dashboard');
+
+        Route::get('/client/medicines', [MedicineController::class, 'clientMedicines'])
+            ->name('client.medicines');
+
+        Route::get('/client/order/{medicine}/create', [OrderController::class, 'clientCreateOrder'])
+            ->name('client.order.create');
+
+        Route::post('/client/order/store', [OrderController::class, 'clientStoreOrder'])
+            ->name('client.order.store');
+
+        Route::get('/client/orders', [OrderController::class, 'clientOrders'])
+            ->name('client.orders');
+            
+        Route::get('/client/profile', [ClientController::class, 'clientProfile'])
+            ->name('client.profile');
+
+        Route::post('/client/profile/update', [ClientController::class, 'updateClientProfile'])
+            ->name('client.profile.update');
+        Route::get('/client/cart', [OrderController::class, 'clientCart'])
+            ->name('client.cart');
+
+        Route::get('/client/cart/add/{medicine}', [OrderController::class, 'addToCart'])
+            ->name('client.cart.add');
+
+        Route::post('/client/cart/update', [OrderController::class, 'updateCart'])
+            ->name('client.cart.update');
+
+        Route::get('/client/cart/remove/{medicine}', [OrderController::class, 'removeFromCart'])
+            ->name('client.cart.remove');
+
+        Route::post('/client/cart/place-order', [OrderController::class, 'placeCartOrder'])
+            ->name('client.cart.placeOrder');
+    });
+
+
     Route::middleware(['role:admin|pharmacy|doctor', 'logs-out-banned-user'])->group(function () {
         Route::get('/', function () {
             return view('index');

@@ -50,4 +50,17 @@ class LoginController extends Controller
 
         return redirect('/login');
     }
+    protected function authenticated($request, $user)
+{
+    if ($user->hasRole('client')) {
+        return redirect()->route('client.dashboard');
+    }
+
+    if ($user->hasRole('admin') || $user->hasRole('pharmacy') || $user->hasRole('doctor')) {
+        return redirect()->route('home');
+    }
+
+    auth()->logout();
+    return redirect('/login');
+}
 }

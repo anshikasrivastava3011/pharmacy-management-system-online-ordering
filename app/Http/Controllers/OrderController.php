@@ -15,6 +15,8 @@ use App\DataTables\OrdersDataTable;
 use App\Http\Requests\StoreOrderRequest;
 use App\Jobs\OrderConfirmationJob;
 use App\Models\Order;
+use App\Models\OrderMedicine;
+use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
@@ -219,4 +221,209 @@ class OrderController extends Controller
             }
         }
     }
+public function clientCreateOrder($medicineId)
+{
+    $medicine = Medicine::findOrFail($medicineId);
+
+    return view('client.create_order', compact('medicine'));
+}
+
+public function clientStoreOrder(Request $request)
+{
+    $request->validate([
+        'medicine_id' => 'required|exists:medicines,id',
+        'quantity' => 'required|integer|min:1',
+    ]);
+
+    $user = Auth::user();
+    $client = Client::where('user_id', $user->id)->firstOrFail();
+
+    $medicine = Medicine::findOrFail($request->medicine_id);
+    $pharmacy = Pharmacy::first();
+
+    if (!$pharmacy) {
+        return redirect()->route('client.medicines')
+            ->with('error', 'No pharmacy available.');
+    }
+
+    $address = Address::where('client_id', $client->id)
+        ->where('is_main', 1)
+        ->first();
+
+    if (!$address) {
+        return redirect()->route('client.profile')
+            ->with('error', 'Please complete your profile address first.');
+    }
+
+    $totalPrice = $medicine->price * $request->quantity;
+
+    $order = Order::create([
+        'user_id' => $user->id,
+        'pharmacy_id' => $pharmacy->id,
+        'doctor_id' => null,
+        'delivering_address_id' => $address->id,
+        'creator_type' => 'client',
+        'status' => 'Processing',
+        'is_insured' => 0,
+        'price' => $totalPrice,
+    ]);
+
+    OrderMedicine::create([
+        'order_id' => $order->id,
+        'medicine_id' => $medicine->id,
+        'quantity' => $request->quantity,
+    ]);
+
+    return redirect()->route('client.orders')
+        ->with('success', 'Order placed successfully!');
+}
+
+public function clientOrders()
+{
+    $orders = Order::with('medicines', 'address')
+        ->where('user_id', Auth::id())
+        ->latest()
+        ->get();
+
+    return view('client.orders', compact('orders'));
+}
+public function addToCart($medicineId)
+{
+    $medicine = Medicine::findOrFail($medicineId);
+    $cart = session()->get('cart', []);
+
+    $currentCartQuantity = isset($cart[$medicineId]) ? $cart[$medicineId]['quantity'] : 0;
+
+    if ($currentCartQuantity + 1 > $medicine->quantity) {
+        return redirect()->route('client.medicines')
+            ->with('error', 'Only ' . $medicine->quantity . ' quantity available for this medicine.');
+    }
+
+    if (isset($cart[$medicineId])) {
+        $cart[$medicineId]['quantity']++;
+    } else {
+        $cart[$medicineId] = [
+            'id' => $medicine->id,
+            'name' => $medicine->commercial_name ?? $medicine->scientific_name ?? $medicine->name ?? 'Medicine',
+            'price' => $medicine->price,
+            'quantity' => 1,
+        ];
+    }
+
+    session()->put('cart', $cart);
+
+    return redirect()->route('client.medicines')->with('success', 'Medicine added to cart!');
+}
+
+public function clientCart()
+{
+    $cart = session()->get('cart', []);
+    return view('client.cart', compact('cart'));
+}
+
+public function updateCart(Request $request)
+{
+    $cart = session()->get('cart', []);
+
+    if ($request->quantities) {
+        foreach ($request->quantities as $medicineId => $quantity) {
+            $medicine = Medicine::findOrFail($medicineId);
+            $quantity = max(1, (int)$quantity);
+
+            if ($quantity > $medicine->quantity) {
+                return redirect()->route('client.cart')
+                    ->with('error', 'Only ' . $medicine->quantity . ' quantity available for ' . ($medicine->commercial_name ?? $medicine->scientific_name ?? $medicine->name));
+            }
+
+            if (isset($cart[$medicineId])) {
+                $cart[$medicineId]['quantity'] = $quantity;
+            }
+        }
+    }
+
+    session()->put('cart', $cart);
+
+    return redirect()->route('client.cart')->with('success', 'Cart updated successfully!');
+}
+
+public function removeFromCart($medicineId)
+{
+    $cart = session()->get('cart', []);
+
+    if (isset($cart[$medicineId])) {
+        unset($cart[$medicineId]);
+    }
+
+    session()->put('cart', $cart);
+
+    return redirect()->route('client.cart')->with('success', 'Medicine removed from cart!');
+}
+
+public function placeCartOrder()
+{
+    $cart = session()->get('cart', []);
+
+    if (empty($cart)) {
+        return redirect()->route('client.cart')->with('error', 'Your cart is empty.');
+    }
+
+    $user = Auth::user();
+    $client = Client::where('user_id', $user->id)->firstOrFail();
+
+    $address = Address::where('client_id', $client->id)
+        ->where('is_main', 1)
+        ->first();
+
+    if (!$address) {
+        return redirect()->route('client.profile')
+            ->with('error', 'Please complete your profile address first.');
+    }
+
+    $pharmacy = Pharmacy::first();
+
+    if (!$pharmacy) {
+        return redirect()->route('client.cart')->with('error', 'No pharmacy available.');
+    }
+
+    $totalPrice = 0;
+
+    foreach ($cart as $item) {
+        $medicine = Medicine::findOrFail($item['id']);
+
+        if ($item['quantity'] > $medicine->quantity) {
+            return redirect()->route('client.cart')
+                ->with('error', 'Only ' . $medicine->quantity . ' quantity available for ' . ($medicine->commercial_name ?? $medicine->scientific_name ?? $medicine->name));
+        }
+
+        $totalPrice += $medicine->price * $item['quantity'];
+    }
+
+    $order = Order::create([
+        'user_id' => $user->id,
+        'pharmacy_id' => $pharmacy->id,
+        'doctor_id' => null,
+        'delivering_address_id' => $address->id,
+        'creator_type' => 'client',
+        'status' => 'Processing',
+        'is_insured' => 0,
+        'price' => $totalPrice,
+    ]);
+
+    foreach ($cart as $item) {
+        $medicine = Medicine::findOrFail($item['id']);
+
+        OrderMedicine::create([
+            'order_id' => $order->id,
+            'medicine_id' => $medicine->id,
+            'quantity' => $item['quantity'],
+        ]);
+
+        $medicine->quantity = $medicine->quantity - $item['quantity'];
+        $medicine->save();
+    }
+
+    session()->forget('cart');
+
+    return redirect()->route('client.orders')->with('success', 'Order placed successfully!');
+}
 }

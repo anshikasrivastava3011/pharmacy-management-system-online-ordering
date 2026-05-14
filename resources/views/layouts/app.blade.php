@@ -11,19 +11,23 @@
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-
     <link rel="stylesheet" href="{{ asset('plugins/fontawesome-free/css/all.min.css') }}">
     <link rel="stylesheet" href="{{ asset('plugins/overlayScrollbars/css/OverlayScrollbars.min.css') }}">
     <link rel="stylesheet" href="{{ asset('dist/css/adminlte.min.css') }}">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
 </head>
 
-<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
+@php
+    $isClient = auth()->check() && auth()->user()->hasRole('client');
+@endphp
+
+<body class="hold-transition {{ $isClient ? 'layout-top-nav' : 'sidebar-mini layout-fixed' }} layout-navbar-fixed layout-footer-fixed">
 <script>
     if (localStorage.getItem('pharmacy-theme') !== 'light') {
         document.body.classList.add('dark-mode');
     }
 </script>
+
 <div class="wrapper">
 
     <div class="preloader flex-column justify-content-center align-items-center">
@@ -35,11 +39,14 @@
     </div>
 
     @include('partials.header')
-    @include('partials.sidebar')
+
+    @if(!$isClient)
+        @include('partials.sidebar')
+    @endif
 
     <div class="content-wrapper">
         <div class="content-header">
-            <div class="container-fluid">
+            <div class="{{ $isClient ? 'container' : 'container-fluid' }}">
                 <div class="row mb-2">
                     <div class="col-sm-6">
                         <span class="m-0 fs-3">Pharmacy System </span>
@@ -48,9 +55,15 @@
 
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item">
-                                <a href="{{ route('index') }}">Home</a>
-                            </li>
+                            @if($isClient)
+                                <li class="breadcrumb-item">
+                                    <a href="{{ route('client.dashboard') }}">Home</a>
+                                </li>
+                            @else
+                                <li class="breadcrumb-item">
+                                    <a href="{{ route('index') }}">Home</a>
+                                </li>
+                            @endif
                             <li class="breadcrumb-item active">Pharmacy System</li>
                         </ol>
                     </div>
@@ -61,7 +74,9 @@
         @yield('content')
     </div>
 
-    <aside class="control-sidebar control-sidebar-dark"></aside>
+    @if(!$isClient)
+        <aside class="control-sidebar control-sidebar-dark"></aside>
+    @endif
 
     @include('partials.footer')
 </div>
@@ -70,7 +85,6 @@
 <script src="{{ asset('plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 <script src="{{ asset('plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js') }}"></script>
 <script src="{{ asset('dist/js/adminlte.min.js') }}"></script>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
 @yield('scripts')
@@ -79,33 +93,46 @@
 <script>
 (function () {
     var sidebar = document.querySelector('.main-sidebar');
+    var themeIcon = document.getElementById('theme-icon');
+    var themeToggle = document.getElementById('theme-toggle');
 
     function applyTheme(theme) {
         if (theme === 'dark') {
             document.body.classList.add('dark-mode');
-            document.getElementById('theme-icon').className = 'fas fa-sun';
+
+            if (themeIcon) {
+                themeIcon.className = 'fas fa-sun';
+            }
+
             if (sidebar) {
                 sidebar.classList.remove('sidebar-light-primary');
                 sidebar.classList.add('sidebar-dark-primary');
             }
+
             localStorage.setItem('pharmacy-theme', 'dark');
         } else {
             document.body.classList.remove('dark-mode');
-            document.getElementById('theme-icon').className = 'fas fa-moon';
+
+            if (themeIcon) {
+                themeIcon.className = 'fas fa-moon';
+            }
+
             if (sidebar) {
                 sidebar.classList.remove('sidebar-dark-primary');
                 sidebar.classList.add('sidebar-light-primary');
             }
+
             localStorage.setItem('pharmacy-theme', 'light');
         }
     }
 
-    // Sync icon and sidebar with the class already on body (set before render)
     applyTheme(document.body.classList.contains('dark-mode') ? 'dark' : 'light');
 
-    document.getElementById('theme-toggle').addEventListener('click', function () {
-        applyTheme(document.body.classList.contains('dark-mode') ? 'light' : 'dark');
-    });
+    if (themeToggle) {
+        themeToggle.addEventListener('click', function () {
+            applyTheme(document.body.classList.contains('dark-mode') ? 'light' : 'dark');
+        });
+    }
 })();
 </script>
 

@@ -19,7 +19,7 @@ class MedicineController extends Controller
      */
     public function index(MedicinesDataTable $dataTable)
     {
-       return $dataTable->render('medicine.index');
+        return $dataTable->render('medicine.index');
     }
 
     /**
@@ -27,10 +27,7 @@ class MedicineController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
-    {
-
-    }
+    public function create() {}
 
     /**
      * Store a newly created resource in storage.
@@ -64,8 +61,8 @@ class MedicineController extends Controller
      */
     public function edit($id)
     {
-         if (is_numeric($id)) {
-            $medicine=Medicine::where('id', $id)->first();
+        if (is_numeric($id)) {
+            $medicine = Medicine::where('id', $id)->first();
             return view('medicine.edit', ['medicine' => $medicine]);
         }
     }
@@ -79,22 +76,27 @@ class MedicineController extends Controller
      */
     public function update(StoreMedicineRequest $request, $id)
     {
-if (is_numeric($id)) {
-    Medicine::where('id', $id)->update($request->validated());
-    return to_route('medicines.index')->with('success', 'Medicine updated successfully!')->with('timeout', 5000);
-}
+        if (is_numeric($id)) {
+            Medicine::where('id', $id)->update($request->validated());
+            return to_route('medicines.index')->with('success', 'Medicine updated successfully!')->with('timeout', 5000);
+        }
     }
 
 
     public function destroy($id)
     {
-if (is_numeric($id)) {
-    try {
-        Medicine::where('id', $id)->delete();
-    } catch (\Illuminate\Database\QueryException $exception) {
-        return to_route('medicines.index')->with('error', ' you can not delete this medicine because is in order ');
+        if (is_numeric($id)) {
+            try {
+                Medicine::where('id', $id)->delete();
+            } catch (\Illuminate\Database\QueryException $exception) {
+                return to_route('medicines.index')->with('error', ' you can not delete this medicine because is in order ');
+            }
+            return to_route('medicines.index');
+        }
     }
-    return to_route('medicines.index');
+    public function clientMedicines()
+{
+    $medicines = Medicine::all();
+    return view('client.medicines', compact('medicines'));
 }
-    }
 }
